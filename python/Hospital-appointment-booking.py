@@ -30,7 +30,7 @@ print("-" * 40 + "\n")
 
 # Ağaç Yapısı Tanımları
 class TreeNode:
-    def __init__(self, value):
+    def _init_(self, value):
         self.value = value
         self.children = []
 
@@ -38,7 +38,7 @@ class TreeNode:
         self.children.append(child_node)
 
 class HospitalTree:
-    def __init__(self, name):
+    def _init_(self, name):
         self.root = TreeNode(name)
 
     def add_department(self, department_name):
@@ -51,39 +51,60 @@ class HospitalTree:
         print("  " * level + node.value)
         for child in node.children:
             self.display(child, level + 1)
-
-# Hastane ve Bölümler
+# Bölümler ve Doktorlar
 hospital = HospitalTree("🏥 Yalova Devlet Hastanesi")
-departments = [
-    "Beyin ve Sinir Cerrahisi",
-    "Göğüs Hastalıkları",
-    "Kulak Burun Boğaz Hastalıkları",
-    "Deri ve Zührevi Hastalıklar",
-    "Ortopedi ve Travmoloji Uzmanı",
-    "Genel Cerrahi",
-    "Kalp ve Damar Cerrahisi",
-    "Ruh Sağlığı ve Hastalıkları",
-    "Kadın Hastalıkları ve Doğum Uzmanı",
-    "Göz Hastalıkları"
-]
+departments_with_doctors = {
+    "Beyin ve Sinir Cerrahisi": ["Dr. Murat Yücel", "Dr. Çetin Serim","Dr. Ali Tekin"],
+    "Göğüs Hastalıkları": ["Dr. Pınar Tunç", "Dr. Mine Deniz","Dr. Nurettin Kaya"],
+    "Kulak Burun Boğaz Hastalıkları": ["Dr. Ali Uz", "Dr. Ftih Sarı","Dr. Sinan Tilki"],
+    "Deri ve Zührevi Hastalıklar": ["Dr. Emin Ay", "Dr. Gizem Çetinkaya","Dr. Gizem Eren"],
+    "Ortopedi ve Travmoloji Uzmanı": ["Dr. Murat Özcan", "Dr. Gözde Kırgın","Dr. Mustafa Bakır"],
+    "Genel Cerrahi": ["Dr. Ertunç Altuntaş", "Dr. Mehmt Ali Yücesoy","Dr. Kemal Gül"],
+    "Kalp ve Damar Cerrahisi": ["Dr. Şafak Şimşek", "Dr. Seçkin Sarı","Dr. Fulya Topuz"],
+    "Ruh Sağlığı ve Hastalıkları": ["Dr. Ali Ulu", "Dr. Ezgi Güngör","Dr. Fatih Serin"],
+    "Kadın Hastalıkları ve Doğum Uzmanı": ["Dr. Zeynep Arslan", "Dr. Kıvanç Kayhan", "Dr. Zerrin Çelik"],
+    "Göz Hastalıkları": ["Dr. Elvin Çelenk", "Dr. Kadir İlker Çankaya","Dr. Esra Kındır"]
+}
 
-# Bölümleri Ekleyelim
-for dept in departments:
-    hospital.add_department(dept)
+# Bölümleri ağaca ekleyelim (Doktorlar gizli)
+for dept in departments_with_doctors.keys():
+    hospital.root.add_child(TreeNode(dept))
 
-# Bölümleri Gösterelim
+# Bölümleri gösterelim
 print("📋 Mevcut Bölümler:")
-hospital.display()
+hospital.display(level=1)  # Sadece bölümleri göster (doktorları değil)
+
+# Bölümler listesi (küçük harf ile eşleştirme için)
+departments_lower = [dept.lower() for dept in departments_with_doctors.keys()]
 
 # Randevu Alma
-departments_lower = [dept.lower() for dept in departments]
 while True:
     bölüm = input("\nRandevu Almak İstediğiniz Bölümü Seçiniz: ").strip().lower()
     if bölüm in departments_lower:
-        seçilen_bölüm = departments[departments_lower.index(bölüm)]
+        seçilen_bölüm = list(departments_with_doctors.keys())[departments_lower.index(bölüm)]
         print(f"\n✅ {seçilen_bölüm} bölümünde randevu almak istediniz.")
+        
+        # Doktorları listele
+        doktorlar = departments_with_doctors[seçilen_bölüm]
+        print("\nBu bölümdeki doktorlar:")
+        for i, doktor in enumerate(doktorlar, 1):
+            print(f"{i}. {doktor}")
+        
+        # Doktor seçimi
+        while True:
+            try:
+                doktor_seçim = int(input("\nRandevu almak istediğiniz doktorun numarasını seçiniz: "))
+                if 1 <= doktor_seçim <= len(doktorlar):
+                    seçilen_doktor = doktorlar[doktor_seçim - 1]
+                    print(f"\n✅ {seçilen_doktor} doktorundan randevu almak istediniz.")
+                    break
+                else:
+                    print("\n❌ Geçersiz bir seçim yaptınız. Lütfen tekrar deneyin.")
+            except ValueError:
+                print("\n❌ Lütfen geçerli bir sayı girin.")
         break
     else:
         print("\n❌ Geçersiz bir bölüm girdiniz. Lütfen tekrar deneyin.")
+    
 
 print("\nRandevunuz başarıyla alınmıştır. Sağlıklı günler dileriz! 🌟")
