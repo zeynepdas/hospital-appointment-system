@@ -1,3 +1,5 @@
+import datetime
+
 # T.C. Kimlik Doğrulama Fonksiyonu
 def tc_kimlik_dogrula(tc):
     # T.C. kimlik numarası 11 haneli ve rakamlardan oluşmalı
@@ -30,7 +32,7 @@ print("-" * 40 + "\n")
 
 # Ağaç Yapısı Tanımları
 class TreeNode:
-    def _init_(self, value):
+    def __init__(self, value):
         self.value = value
         self.children = []
 
@@ -38,7 +40,7 @@ class TreeNode:
         self.children.append(child_node)
 
 class HospitalTree:
-    def _init_(self, name):
+    def __init__(self, name):
         self.root = TreeNode(name)
 
     def add_department(self, department_name):
@@ -51,6 +53,7 @@ class HospitalTree:
         print("  " * level + node.value)
         for child in node.children:
             self.display(child, level + 1)
+
 # Bölümler ve Doktorlar
 hospital = HospitalTree("🏥 Yalova Devlet Hastanesi")
 departments_with_doctors = {
@@ -77,7 +80,78 @@ hospital.display(level=1)  # Sadece bölümleri göster (doktorları değil)
 # Bölümler listesi (küçük harf ile eşleştirme için)
 departments_lower = [dept.lower() for dept in departments_with_doctors.keys()]
 
-# Randevu Alma
+# Linked List Node Tanımı
+class Node:
+    def __init__(self, doctor, department, date, time):
+        self.doctor = doctor
+        self.department = department
+        self.date = date
+        self.time = time
+        self.next = None  # Sonraki randevuya bağlantı
+
+# Linked List Tanımı
+class AppointmentList:
+    def __init__(self):
+        self.head = None
+
+    # Randevu ekleme
+    def add_appointment(self, doctor, department, date, time):
+        new_node = Node(doctor, department, date, time)
+        if not self.head:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+
+    # Randevuları gösterme
+    def display_appointments(self):
+        current = self.head
+        if not current:
+            print("\n❌ Henüz randevu alınmamış.")
+        while current:
+            print(f"\nDoktor: {current.doctor}")
+            print(f"Bölüm: {current.department}")
+            print(f"Tarih: {current.date}")
+            print(f"Saat: {current.time}")
+            current = current.next
+
+# Girilen tarihin geçip geçmediğini kontrol eden fonksiyon
+def check_past_date(input_date):
+    try:
+        # Kullanıcının girdiği tarihi datetime objesine çevir
+        entered_date = datetime.datetime.strptime(input_date, "%d.%m.%Y")
+
+        # Bugünün tarihini al
+        current_date = datetime.datetime.now()
+
+        # Tarih karşılaştırması
+        if entered_date < current_date:
+            return True  # Girilen tarih geçmiş
+        else:
+            return False  # Girilen tarih gelecekte
+    except ValueError:
+        print("\n❌ Geçersiz tarih formatı! Lütfen GG.AA.YYYY formatında giriniz.")
+        return None  # Geçersiz tarih formatı
+
+# Tarih alma ve kontrol etme
+def get_appointment_date():
+    while True:
+        tarih = input("Randevu Tarihini Giriniz (GG.AA.YYYY): ").strip()
+        result = check_past_date(tarih)
+        if result is not None:
+            if result:
+                print("\n❌ Girilen tarih geçmiş bir tarihtir! Lütfen geçerli bir tarih giriniz.")
+            else:
+                print("\n✅ Geçerli bir tarih girdiniz.")
+                return tarih  # Geçerli tarih döndürülür
+        else:
+            continue
+
+# Randevu alma işlemi
+appointment_list = AppointmentList()
+
 while True:
     bölüm = input("\nRandevu Almak İstediğiniz Bölümü Seçiniz: ").strip().lower()
     if bölüm in departments_lower:
@@ -102,9 +176,29 @@ while True:
                     print("\n❌ Geçersiz bir seçim yaptınız. Lütfen tekrar deneyin.")
             except ValueError:
                 print("\n❌ Lütfen geçerli bir sayı girin.")
+        
+        # Randevu tarihi ve saatini alalım
+        print("\nRandevu Tarihi ve Saati Seçiniz.")
+        randevu_tarih = get_appointment_date()
+
+        # Saat alımı ve doğrulama
+        while True:
+            saat = input("Randevu Saatini Giriniz (HH.MM): ").strip()
+            try:
+                # Saat formatını doğrulama
+                datetime.datetime.strptime(saat, "%H.%M")
+                break  # Saat geçerli, çıkıyoruz
+            except ValueError:
+                print("\n❌ Geçersiz saat formatı! Lütfen HH:MM formatında giriniz.")
+
+        # Randevuyu listeye ekleyelim
+        appointment_list.add_appointment(seçilen_doktor, seçilen_bölüm, randevu_tarih, saat)
         break
     else:
         print("\n❌ Geçersiz bir bölüm girdiniz. Lütfen tekrar deneyin.")
-    
+
+# Randevularınızı görüntüleyelim
+print("\nRandevularınız:")
+appointment_list.display_appointments()
 
 print("\nRandevunuz başarıyla alınmıştır. Sağlıklı günler dileriz! 🌟")
